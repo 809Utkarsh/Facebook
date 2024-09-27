@@ -1,10 +1,12 @@
-import { Router } from "express";
-import { createPost, getPosts } from "../controllers/postController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+    import { Router } from "express";
+    import { createPost, getPosts } from "../controllers/postController";
+    import { authMiddleware } from "../middlewares/authMiddleware";
+import { upload } from "../middlewares/upload";
 
-const router = Router();
+    const router = Router();
 
-router.post("/", authMiddleware, createPost);
-router.get("/", getPosts);
+  
+    router.post("/", authMiddleware, upload.single('file'), createPost);
+    router.get("/", getPosts);
 
-export default router;
+    export default router;

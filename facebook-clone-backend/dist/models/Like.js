@@ -27,10 +27,11 @@ const mongoose_1 = __importStar(require("mongoose"));
 const LikeSchema = new mongoose_1.Schema({
     user_id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     post_id: { type: mongoose_1.Schema.Types.ObjectId, ref: "Post", required: true },
-    createdAt: { type: Date, default: Date.now },
 }, {
     versionKey: false,
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
 });
+// Adding an index to optimize query performance
+LikeSchema.index({ user_id: 1, post_id: 1 }, { unique: true }); // Ensure a user can only like a post once
 const Like = mongoose_1.default.model("Like", LikeSchema);
 exports.default = Like;

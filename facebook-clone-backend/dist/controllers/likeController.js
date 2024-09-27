@@ -3,39 +3,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLikesByPost = exports.unlikePost = exports.likePost = void 0;
+exports.getLikesByPost = exports.toggleLikePost = void 0;
 const Like_1 = __importDefault(require("../models/Like"));
-// Like a post
-const likePost = async (req, res) => {
+const Post_1 = __importDefault(require("../models/Post")); // Ensure you import the Post model
+// Toggle like or unlike a post
+// Toggle like or unlike a post
+const toggleLikePost = async (req, res) => {
     try {
-        const { post_id } = req.body;
+        const { post_id } = req.body; // Ensure post_id is sent in the body
         const user_id = req.user._id;
         // Check if user has already liked the post
         const existingLike = await Like_1.default.findOne({ user_id, post_id });
-        if (existingLike) {
-            return res.status(400).json({ message: "You already liked this post." });
+        const post = await Post_1.default.findById(post_id);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
         }
-        const newLike = await Like_1.default.create({ user_id, post_id });
-        res.status(201).json(newLike);
+        let updatedLikesCount = post.likesCount; // Initialize updated likes count
+        if (existingLike) {
+            // If the like exists, unlike the post
+            await Like_1.default.findOneAndDelete({ user_id, post_id });
+            if (updatedLikesCount > 0) {
+                updatedLikesCount--; // Decrement likes count
+                await Post_1.default.findByIdAndUpdate(post_id, { $inc: { likesCount: -1 } });
+            }
+            console.log(`Post unliked successfully: ${updatedLikesCount} likes remaining`);
+            return res.status(200).json({ message: "Post unliked successfully", likesCount: updatedLikesCount });
+        }
+        else {
+            // If the like does not exist, like the post
+            await Like_1.default.create({ user_id, post_id });
+            updatedLikesCount++; // Increment likes count
+            await Post_1.default.findByIdAndUpdate(post_id, { $inc: { likesCount: 1 } });
+            console.log(`Post liked successfully: ${updatedLikesCount} likes now`);
+            return res.status(201).json({ message: "Post liked successfully", likesCount: updatedLikesCount });
+        }
     }
     catch (error) {
         res.status(500).json({ error: error instanceof Error ? error.message : "An unknown error occurred" });
     }
 };
-exports.likePost = likePost;
-// Unlike a post
-const unlikePost = async (req, res) => {
-    try {
-        const { post_id } = req.params;
-        const user_id = req.user._id;
-        await Like_1.default.findOneAndDelete({ user_id, post_id });
-        res.status(200).json({ message: "Post unliked successfully" });
-    }
-    catch (error) {
-        res.status(500).json({ error: error instanceof Error ? error.message : "An unknown error occurred" });
-    }
-};
-exports.unlikePost = unlikePost;
+exports.toggleLikePost = toggleLikePost;
 // Get likes for a specific post
 const getLikesByPost = async (req, res) => {
     try {

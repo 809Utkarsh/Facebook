@@ -1,13 +1,18 @@
 import multer, {FileFilterCallback} from 'multer';
 import {Request} from 'express';
+import fs from 'fs';
 import path from 'path';
 
+
+const mediaDir = 'media/';
+if(!fs.existsSync(mediaDir)){
+    fs.mkdirSync(mediaDir,{recursive:true});
+}
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
-        cb(null, 'uploads/');
+        cb(null, 'media/');
     },
     filename:function(req,file,cb){
-        cb(null,'uploads/');
         cb(null, `${Date.now()}-${file.originalname}`);
     },
     

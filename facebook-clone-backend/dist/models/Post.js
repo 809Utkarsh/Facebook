@@ -26,10 +26,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const PostSchema = new mongoose_1.Schema({
     user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, required: true },
+    content: { type: String, required: false },
+    file: { type: String, required: false },
     createdAt: { type: Date, default: Date.now },
-    likes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
-    comments: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Comment" }], // Added comments field
+    likesCount: { type: Number, default: 0 },
+    comments: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Comment" }], // Array of comment IDs
 });
 const Post = mongoose_1.default.model("Post", PostSchema);
 exports.default = Post;

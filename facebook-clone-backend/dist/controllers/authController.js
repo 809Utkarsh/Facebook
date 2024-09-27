@@ -13,17 +13,22 @@ const register = async (req, res) => {
     const { username, email, password } = req.body;
     try {
         console.log('Request data:', { username, email, password });
+        //
+        const existingUser = await User_1.default.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
         const hashedPassword = await bcryptjs_1.default.hash(password, 10);
         console.log('Hashed password:', hashedPassword);
         const user = new User_1.default({ username, email, password: hashedPassword });
         await user.save();
-        const token = jsonwebtoken_1.default.sign({ id: user._id }, process.env.JWT_SECRET || "75y", { expiresIn: "2h" });
+        const token = jsonwebtoken_1.default.sign({ id: user._id }, process.env.JWT_SECRET || "", { expiresIn: "2h" });
         console.log('Generated token:', token);
         res.status(201).json({ token });
     }
     catch (error) {
         console.error('Error creating user:', error);
-        res.status(400).json({ message: "Error creating user" });
+        res.status(500).json({ message: "Error creating user" });
     }
 };
 exports.register = register;

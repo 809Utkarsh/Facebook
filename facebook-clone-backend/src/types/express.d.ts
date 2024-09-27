@@ -1,9 +1,17 @@
-import { IUser } from "../models/User"; // Adjust path to your User model
+import { IUser } from "../models/User"; 
+import { Request } from 'express';// Adjust path to your User model
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser; // Add the user property to the Request object
+      user?: IUser; 
+      newAccessToken?: string;// Add the user property to the Request object
     }
+  }
+}
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    newAccessToken?: string;
   }
 }
